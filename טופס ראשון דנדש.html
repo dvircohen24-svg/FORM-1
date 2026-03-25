@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WorldTrip AI - התחלת תכנון</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f6f2ec;--cream2:#ede7dd;--cream3:#d8cfc2;
+  --teal:#26796c;--teal2:#1a5a50;--tlt:#e6f3f1;
+  --ink:#1a1714;--ink2:#3c3830;--ink3:#6a6258;
+  --wh:#fff;--bdr:rgba(0,0,0,.09);
+  --sh:0 2px 16px rgba(26,23,20,.08);--sh2:0 6px 32px rgba(26,23,20,.13);
+  --gold:#c4a270;
+}
+html,body{height:100%;font-family:"Heebo",sans-serif;font-size:16px;background:var(--cream);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+.topbar{height:75px;background:var(--ink);display:flex;align-items:center;padding:0 30px;gap:20px;flex-shrink:0;z-index:50}
+.logo{font-size:28px;font-weight:900;color:#fff;cursor:pointer}.logo b{color:#c4a270}
+
+.page{display:none;height:calc(100vh - 75px);overflow:hidden;flex-direction:column}
+.page.active{display:flex}
+
+#wizPage{position:relative}
+.wbg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.wbg-p{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.5s}
+.wbg-p.on{opacity:1}
+.wbg-ov{position:absolute;inset:0;background:linear-gradient(115deg,rgba(246,242,236,.96) 0%,rgba(246,242,236,.78) 42%,rgba(246,242,236,.38) 100%)}
+.wiz-body{position:relative;z-index:1;display:flex;flex:1;align-items:center;padding:0 5vw;gap:4vw;overflow:hidden; transition: padding 0.3s;}
+.wcol{width:560px;flex-shrink:0; max-height:88vh; display:flex; flex-direction:column; transition: width 0.3s;}
+.step-bar {display:flex; gap:8px; margin-bottom:20px; justify-content:center}
+.sdot {height:6px; flex:1; background:rgba(0,0,0,0.1); border-radius:10px; transition:0.3s}
+.sdot.done {background:rgba(38,121,108,0.5)}
+.sdot.on {background:var(--teal)}
+.step-label {text-align:center; font-size:13px; color:var(--ink3); font-weight:600; margin-bottom:10px}
+
+.wcol-scroll {overflow-y:auto; padding-left:6px; padding-bottom:30px}
+.wcard{background:rgba(255,255,255,.92);backdrop-filter:blur(18px);border-radius:18px;padding:30px;border:1px solid rgba(255,255,255,.95);box-shadow:var(--sh2); flex-shrink:0; transition: padding 0.3s;}
+.sp{display:none;animation:spIn .3s ease}.sp.on{display:block}
+@keyframes spIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+
+.greeting-text {font-size:18px; color:var(--ink2); margin-bottom:20px; line-height:1.6; font-weight:500; background:rgba(255,255,255,0.6); padding:15px 20px; border-radius:12px; border-right:4px solid var(--teal)}
+.sp-title{font-size:30px;font-weight:900;line-height:1.2;color:var(--ink);margin-bottom:20px}
+.sp-title em{font-style:normal;color:var(--teal)}
+.sp-subtitle {font-size:17px; font-weight:700; margin-bottom:12px; margin-top:22px; color:var(--ink2)}
+
+.srch{position:relative;margin-bottom:12px}
+.srch input, textarea, select{width:100%;padding:14px 12px;border:2px solid var(--cream3);border-radius:12px;font-family:"Heebo";font-size:16px;font-weight:600;background:var(--cream);outline:none;transition:.2s}
+.srch input:focus, textarea:focus, select:focus {border-color:var(--teal)}
+.srch-note {font-size:13px; color:var(--ink3); margin-top:5px; display:block}
+.custom-list {display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border-radius:12px; z-index:999; max-height:250px; overflow-y:auto; box-shadow:var(--sh2); border:1px solid var(--cream3)}
+.custom-list div {padding:15px; cursor:pointer; font-weight:600; border-bottom:1px solid var(--cream2)}
+
+.ogrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.oc{border:2px solid var(--cream3);border-radius:15px;padding:15px 10px;text-align:center;cursor:pointer;background:var(--cream);transition:.2s}
+.oc.on{border-color:var(--teal);background:var(--tlt)}
+.oc-i{font-size:30px;margin-bottom:8px;display:block}
+
+.bgrid{display:grid;gap:12px}
+.bcard{background:#fff;border:2px solid var(--cream3);border-radius:15px;padding:18px;display:flex;align-items:center;gap:15px;cursor:pointer;transition:.2s}
+.bcard:hover{border-color:var(--teal2)}
+.bcard.on{border-color:var(--teal);background:var(--tlt);box-shadow:var(--sh)}
+.bcard span{font-size:28px}
+.bcard-body { flex:1 }
+.bcard-body b { display:block; font-size:16px }
+.bcard-body small { color:var(--ink3); font-size:13px }
+
+.wnav{display:flex;align-items:center;justify-content:space-between;margin-top:25px;padding-top:18px;border-top:1px solid var(--cream3)}
+.wback{background:none;border:2px solid var(--cream3);padding:10px 25px;border-radius:99px;font-weight:700;cursor:pointer;font-family:"Heebo";font-size:15px}
+.wnext, .wgo{background:var(--teal);color:#fff;padding:12px 30px;border-radius:99px;font-weight:800;cursor:pointer;border:none;font-family:"Heebo";font-size:16px;transition:0.2s}
+.wnext:hover,.wgo:hover{background:var(--teal2)}
+.wnext:disabled{opacity:.3; cursor:not-allowed}
+
+.wphoto-col{flex:1;display:flex;align-items:center;justify-content:center;position:relative; transition: opacity 0.3s;}
+.wpm{position:relative;width:80%;aspect-ratio:4/5;border-radius:24px;overflow:hidden;box-shadow:var(--sh2);animation:spIn 1s ease}
+.wpm img{width:100%;height:100%;object-fit:cover}
+.wpm-cap{position:absolute;bottom:30px;left:30px;right:30px;background:rgba(26,23,20,.8);backdrop-filter:blur(10px);color:#fff;padding:20px;border-radius:16px;font-size:24px;font-weight:800}
+
+.budget-mix-row { display:flex; gap:10px; align-items:center; margin-bottom:10px }
+.budget-mix-row label { font-weight:700; min-width:90px; font-size:14px; color:var(--ink2) }
+.budget-mix-row .bgrid { flex:1 }
+.budget-mix-row .bcard { padding:12px; }
+.budget-mix-row .bcard span { font-size:20px }
+
+input[type=number] { width:100%; padding:14px; border:2px solid var(--cream3); border-radius:10px; font-family:"Heebo"; font-size:16px; font-weight:700; outline:none }
+input[type=number]:focus { border-color:var(--teal) }
+input[type=date] { padding:10px 12px; border:2px solid var(--cream3); border-radius:12px; font-family:"Heebo"; font-size:15px; outline:none; background:var(--cream) }
+input[type=date]:focus { border-color:var(--teal) }
+
+.child-row { display:flex; align-items:center; gap:10px; background:var(--cream); padding:10px 14px; border-radius:12px; margin-bottom:8px }
+.child-row input[type=number] { width:60px; padding:8px; text-align:center; }
+
+.gen{display:none;position:fixed;inset:0;z-index:300;background:rgba(26,23,20,0.95);backdrop-filter:blur(10px);flex-direction:column;align-items:center;justify-content:center}
+.gen.on{display:flex}
+.spinner {width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.1); border-top-color: var(--teal); border-radius: 50%; animation: spin 1s linear infinite}
+@keyframes spin { to { transform: rotate(360deg); } }
+.pct {color:#fff; font-size:24px; font-weight:bold; margin-top:20px}
+.gen-step {color:rgba(255,255,255,0.7); margin-top:10px}
+
+/* סגנונות מיוחדים למסך הסיום בלבד */
+.full-screen-mode .wiz-body { padding: 2vh 2vw; justify-content: center;}
+.full-screen-mode .wcol { width: 100%; max-width: 1200px; max-height: 95vh; }
+.full-screen-mode .wcard { padding: 40px 60px; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; overflow-y: hidden;}
+.full-screen-mode .wphoto-col { display: none !important; }
+
+@media (max-width: 800px) {
+  .topbar { padding: 0 15px; }
+  .logo { font-size: 24px; }
+  .wiz-body { flex-direction: column; overflow-y: auto; padding: 20px; display: block; }
+  .wcol { width: 100%; max-height: none; display: block; }
+  .wphoto-col { display: none; }
+  .wcard { padding: 20px; }
+  .ogrid, .bgrid { grid-template-columns: 1fr !important; }
+  .sp-title { font-size: 26px; }
+  
+  .full-screen-mode .wcard { padding: 20px; height: auto; overflow-y: auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo" onclick="location.reload()">World<b>Trip</b> <span style="font-size:14px; color:var(--cream3); font-weight:normal;">BETA</span></div>
+</div>
+
+<div class="page active" id="wizPage">
+  <div class="wbg">
+    <div class="wbg-p on" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1800')"></div>
+    <div class="wbg-ov"></div>
+  </div>
+  <div class="wiz-body" id="wizBody">
+    <div class="wcol" id="mainWcol">
+      <div class="step-label" id="wStepLabel"></div>
+      <div class="step-bar" id="wDots"></div>
+      <div class="wcol-scroll" id="wcolScroll">
+        <div class="wcard" id="mainWcard">
+
+        <div class="sp on" id="sp1">
+          <div class="greeting-text">היי! אנחנו כאן כדי לתפור לכם את הטיול המושלם ✈️</div>
+          <div class="sp-title">לאן <em>טסים</em>?</div>
+          <div class="srch">
+            <input type="text" id="destIn" placeholder="הזינו עיר או מדינה..." autocomplete="off">
+            <span class="srch-note">* לא מוצאים ברשימה? נסו לכתוב באנגלית</span>
+            <div id="dropdownDest" class="custom-list"></div>
+          </div>
+          <div class="sp-subtitle">תאריכי הטיול (עד 14 ימים לבטא):</div>
+          <div style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap">
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);display:block;margin-bottom:4px">יציאה</label>
+              <input type="date" id="dateFrom">
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);display:block;margin-bottom:4px">חזרה</label>
+              <input type="date" id="dateTo">
+            </div>
+          </div>
+          <div style="margin-top:10px"><label style="font-weight:700">משך הטיול: <b id="dv">14</b> ימים</label><input type="range" min="1" max="14" value="14" style="width:100%" oninput="onDays(this)"></div>
+
+         <div class="sp-subtitle" style="margin-top:20px;">סטטוס ההכנות:</div>
+          <div class="bgrid">
+            <div class="bcard" style="cursor:default">
+                <span>✈️</span><div class="bcard-body"><b>יש כבר כרטיסי טיסה?</b></div>
+                <div onclick="toggleCustomBool('hasFlights')" id="hasFlightsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
+            </div>
+           
+            <div class="bcard" style="cursor:default">
+                <span>🏨</span><div class="bcard-body"><b>הוזמנו כבר מלונות?</b></div>
+                <div onclick="toggleCustomBool('hasHotels')" id="hasHotelsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
+            </div>
+            <div class="bcard" style="cursor:default">
+                <span>🗺️</span><div class="bcard-body"><b>מצב התכנון:</b></div>
+              
+                <select id="planningStatusIn" style="width:130px; padding:5px; border-radius:8px; font-family:Heebo; border:2px solid var(--cream3); outline:none;" onchange="S.planningStatus = this.value;">
+                    <option value="עדיין לא התחלנו">לא התחלנו כלל</option>
+                    <option value="יש כיוון כללי">יש כיוון כללי</option>
+                    <option value="תכננו חלקית">תכננו חלקית</option>
+                    <option value="הכל סגור">הכל כבר סגור</option>
+                </select>
+            </div>
+          </div>
+  
+         <div class="wnav"><div></div><button class="wnext" id="n1" disabled onclick="goSp(2,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp2">
+          <div class="sp-title">מי נוסע?</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="pGroup(this,'type','זוג','gType')"><span class="oc-i">💑</span>זוג</div>
+            <div class="oc" onclick="pGroup(this,'type','משפחה','gType')"><span class="oc-i">👨‍👩‍👧‍👦</span>משפחה</div>
+            <div class="oc" onclick="pGroup(this,'type','חברים','gType')"><span class="oc-i">🍻</span>חברים</div>
+            <div class="oc" onclick="pGroup(this,'type','מבוגרים','gType')"><span class="oc-i">🍷</span>מבוגרים</div>
+          </div>
+          
+          <div id="adultsSection" style="display:none; margin-top:15px">
+            <div class="sp-subtitle">מספר מבוגרים/נוסעים:</div>
+            <div class="child-row" style="background:transparent; padding:0;">
+               <input type="number" id="adultsIn" min="1" value="2" onchange="S.adults=parseInt(this.value); chkBtns();" style="width:100px; text-align:center;">
+            </div>
+          </div>
+
+          <div id="childrenSection" style="display:none; margin-top:15px">
+            <div class="sp-subtitle">גילאי הילדים:</div>
+            <div id="childrenList"></div>
+            <button onclick="addChild()" style="background:none;border:2px dashed var(--cream3);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:700;color:var(--ink2);font-family:Heebo;margin-top:5px">+ הוסף ילד</button>
+            <div style="margin-top:10px">
+              <div class="bcard" style="cursor:default" id="strollerCard">
+                <span>🦽</span><div class="bcard-body"><b>עגלה / כיסא גלגלים?</b></div>
+                <div onclick="toggleBool('stroller')" id="strollerToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div class="bcard" style="cursor:default">
+              <span>🐕</span><div class="bcard-body"><b>נוסע עם כלב?</b></div>
+              <div onclick="toggleBool('dog')" id="dogToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
+            </div>
+          </div>
+          <div class="wnav"><button class="wback" onclick="goSp(1,-1)">חזור</button><button class="wnext" id="n2" disabled onclick="goSp(3,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp3">
+          <div class="sp-title">ספרו לנו עוד</div>
+          <div class="sp-subtitle">מטרת הטיול:</div>
+          <div class="srch">
+            <input type="text" id="tripPurposeIn" placeholder='למשל: "טיול פארקים בארה"ב" / "טיול רומנטי בפרובאנס"'>
+          </div>
+          <div class="sp-subtitle">ניסיון עבר:</div>
+          <div style="display:grid;gap:10px">
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:4px;display:block">מה הכי אהבתם בטיולים קודמים?</label>
+              <textarea id="likedIn" rows="2" placeholder="למשל: מסעדות מקומיות, פארקים לאומיים..."></textarea>
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:4px;display:block">מה לא כל כך אהבתם?</label>
+              <textarea id="dislikedIn" rows="2" placeholder="למשל: הרבה נסיעות, מקומות עמוסי תיירים..."></textarea>
+            </div>
+          </div>
+          <div class="wnav"><button class="wback" onclick="goSp(2,-1)">חזור</button><button class="wnext" id="n3" onclick="goSp(4,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp4">
+          <div class="sp-title">תקציב <em>מדויק</em></div>
+          <div class="sp-subtitle">תקציב משוער לטיול (מספר בלבד):</div>
+          
+          <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div class="srch" style="flex:2; margin-bottom:0;">
+                <input type="number" id="totalBudgetIn" placeholder="למשל 15000" min="0" oninput="onBudgetInput()">
+            </div>
+            <div class="srch" style="flex:1; margin-bottom:0;">
+                <select id="currencyIn" onchange="S.currency = this.value; chkBtns();">
+                    <option value="₪">₪ שקלים</option>
+                    <option value="$">$ דולרים</option>
+                    <option value="€">€ יורו</option>
+                </select>
+            </div>
+          </div>
+
+          <div class="sp-subtitle">תקציב ללילה (בשקלים):</div>
+          <div class="srch" style="margin-bottom:15px;">
+              <input type="number" id="nightlyBudgetIn" placeholder="למשל 500" min="0" oninput="S.nightlyBudget = parseInt(this.value) || 0;">
+          </div>
+  
+          <div class="bgrid">
+            <div class="bcard" style="cursor:default">
+                <span>✈️</span><div class="bcard-body"><b>כולל טיסות?</b><small>האם הסכום כולל קניית כרטיסים</small></div>
+                <div onclick="toggleCustomBool('includesFlights')" id="includesFlightsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
+            </div>
+            <div class="bcard" style="cursor:default">
+                <span>👥</span><div class="bcard-body"><b>לכל ההרכב או לאדם?</b><small>איך לחשב את התקציב</small></div>
+                <div onclick="toggleCustomBool('budgetPerPerson')" id="budgetPerPersonToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לכל ההרכב</div>
+            </div>
+          </div>
+
+          <div class="sp-subtitle">תמהיל תקציב פנימי:</div>
+          <div style="display:grid;gap:10px">
+            <div class="budget-mix-row">
+              <label>🛏️ לינה</label>
+              <div class="bgrid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="bcard" onclick="pGroup(this,'accommodationLevel','לואו קוסט','gBAcc')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">⛺</span><small>לואו קוסט</small></div>
+                <div class="bcard" onclick="pGroup(this,'accommodationLevel','4 כוכבים/דירה','gBAcc')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">🏨</span><small>4 כוכבים/דירה</small></div>
+                <div class="bcard" onclick="pGroup(this,'accommodationLevel','מלון 5 כוכבים','gBAcc')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">🌟</span><small>5 כוכבים</small></div>
+              </div>
+            </div>
+
+            <div class="budget-mix-row">
+              <label>🎡 אטרקציות</label>
+              <div class="bgrid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="bcard" onclick="pGroup(this,'budgetAttr','חסכוני','gBAttr')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">💰</span><small>חסכוני</small></div>
+                <div class="bcard" onclick="pGroup(this,'budgetAttr','בינוני','gBAttr')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">💳</span><small>בינוני</small></div>
+                <div class="bcard" onclick="pGroup(this,'budgetAttr','פרמיום','gBAttr')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">👑</span><small>פרמיום</small></div>
+              </div>
+            </div>
+            <div class="budget-mix-row">
+              <label>🍽️ אוכל</label>
+              <div class="bgrid" style="grid-template-columns:1fr 1fr 1fr">
+                <div class="bcard" onclick="pGroup(this,'budgetFood','בישול בשטח','gBFood')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">🏕️</span><small>בישול בשטח</small></div>
+                <div class="bcard" onclick="pGroup(this,'budgetFood','מזון מהיר','gBFood')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">🍔</span><small>מזון מהיר</small></div>
+                <div class="bcard" onclick="pGroup(this,'budgetFood','מסעדות','gBFood')" style="padding:10px;flex-direction:column;gap:4px;text-align:center"><span style="font-size:16px">🍴</span><small>מסעדות</small></div>
+              </div>
+            </div>
+          </div>
+          <div class="wnav"><button class="wback" onclick="goSp(3,-1)">חזור</button><button class="wnext" id="n4" disabled onclick="goSp(5,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp5">
+          <div class="sp-title">סגנון <em>הטיול</em></div>
+          <div class="sp-subtitle">מה ה-DNA? (אפשר לבחור כמה)</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="toggleVibe(this,'בטן גב')">🏝️ בטן גב</div>
+            <div class="oc" onclick="toggleVibe(this,'עירוני')">🏙️ עירוני</div>
+            <div class="oc" onclick="toggleVibe(this,'טבע ונופים')">🌿 טבע ונופים</div>
+            <div class="oc" onclick="toggleVibe(this,'טרקים')">🥾 טרקים</div>
+            <div class="oc" onclick="toggleVibe(this,'גסטרונומיה')">🍜 גסטרונומיה</div>
+            <div class="oc" onclick="toggleVibe(this,'תרבות והיסטוריה')">🏛️ תרבות</div>
+          </div>
+          
+          <div class="sp-subtitle">פעילויות אקסטרים?</div>
+          <div class="ogrid" id="extQuest" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="setExtreme(this,'כן')">👍 כן</div>
+            <div class="oc" onclick="setExtreme(this,'לא')">👎 לא</div>
+          </div>
+          <div class="wnav"><button class="wback" onclick="goSp(4,-1)">חזור</button><button class="wnext" id="n5" disabled onclick="goSp(6,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp6">
+          <div class="sp-title">לוגיסטיקה</div>
+          <div class="sp-subtitle">התניידות:</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="pGroup(this,'transport','רכב שכור','gTrans')">🚗 רכב שכור</div>
+            <div class="oc" onclick="pGroup(this,'transport','קראוון','gTrans')">🚐 קראוון</div>
+            <div class="oc" onclick="pGroup(this,'transport','תחבורה ציבורית','gTrans')">🚆 תחבורה</div>
+            <div class="oc" onclick="pGroup(this,'transport','שילוב','gTrans')">🔀 שילוב</div>
+          </div>
+          
+          <div class="sp-subtitle">קצב טיול:</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="pGroup(this,'pace','אינטנסיבי','gPace')">🏃 אינטנסיבי</div>
+            <div class="oc" onclick="pGroup(this,'pace','רגוע','gPace')">☕ רגוע</div>
+          </div>
+
+          <div class="sp-subtitle">קצב מעברים (סגנון טיול):</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="pGroup(this,'transferPace','יותר מעברים (להספיק יותר)','gTPace')">🧳 יותר מעברים</div>
+            <div class="oc" onclick="pGroup(this,'transferPace','טיול כוכב','gTPace')">⭐ טיול כוכב</div>
+          </div>
+
+          <div class="sp-subtitle">מוכנות לנסיעות ארוכות וטיסות פנים:</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="pGroup(this,'longDrives','כן','gLDrives')">👍 כן, בכיף</div>
+            <div class="oc" onclick="pGroup(this,'longDrives','לא','gLDrives')">👎 מעדיף להימנע</div>
+          </div>
+       
+          <div class="sp-subtitle">מעברים ביום שלם:</div>
+          <div class="ogrid" style="grid-template-columns:1fr">
+            <div class="oc" onclick="pGroup(this,'transfers','ימי נסיעות מרווחים, בלי אטרקציות','gTransfers')">🗓️ ימי נסיעות מרווחים, בלי אטרקציות</div>
+            <div class="oc" onclick="pGroup(this,'transfers','מוכנים לשלב נסיעות ואטרקציות באותו יום (אינטנסיבי)','gTransfers')">⚡ מוכנים לשלב נסיעות ואטרקציות באותו יום (אינטנסיבי)</div>
+          </div>
+          
+          <div class="sp-subtitle">שעות פעילות:</div>
+          <div style="display:flex;gap:15px;flex-wrap:wrap">
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:4px;display:block">התחלת יום</label>
+              <input type="time" id="startTime" value="08:00" style="padding:10px;border:2px solid var(--cream3);border-radius:10px;font-family:Heebo;font-size:14px;outline:none">
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:4px;display:block">סיום יום</label>
+              <input type="time" id="endTime" value="22:00" style="padding:10px;border:2px solid var(--cream3);border-radius:10px;font-family:Heebo;font-size:14px;outline:none">
+            </div>
+            <div>
+              <label style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:4px;display:block">כמה נהגים</label>
+              <input type="number" id="driversIn" min="0" max="10" value="1" style="width:70px">
+            </div>
+          </div>
+          <div class="wnav"><button class="wback" onclick="goSp(5,-1)">חזור</button><button class="wnext" id="n6" disabled onclick="goSp(7,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp7">
+          <div class="sp-title">הגבלות ועוגנים</div>
+          <div class="sp-subtitle">הגבלות דתיות/תזונתיות:</div>
+          <div class="ogrid" style="grid-template-columns:1fr 1fr">
+            <div class="oc" onclick="toggleBoolOc(this,'shabbat')">🕯️ שמירת שבת</div>
+            <div class="oc" onclick="toggleBoolOc(this,'kosherFood')">✡️ אוכל כשר</div>
+            <div class="oc" onclick="toggleBoolOc(this,'kosherSupermarkets')">🛒 סופרים כשרים</div>
+            <div class="oc" onclick="toggleBoolOc(this,'noMeat')">🥩 לא אוכלים בשר</div>
+            <div class="oc" onclick="toggleBoolOc(this,'vegan')">🌱 טבעוני/צמחוני</div>
+            <div class="oc" onclick="toggleBoolOc(this,'glutenfree')">🌾 ללא גלוטן</div>
+          </div>
+          <div class="sp-subtitle">יעדי חובה (חובה לכלול בכל מסלול):</div>
+          <div class="srch">
+            <input type="text" id="anchorsIn" placeholder="מה חייבים לראות? (למשל: תצפית אל האגם)" autocomplete="off">
+          </div>
+          <div class="sp-subtitle">עונה מועדפת:</div>
+          <div class="srch">
+            <input type="text" id="seasonIn" placeholder="למשל: סתיו, או אוקטובר" autocomplete="off">
+          </div>
+          <textarea id="freeNotes" rows="2" placeholder="הערות נוספות חופשיות..." style="margin-top:12px"></textarea>
+          
+          <div class="wnav"><button class="wback" onclick="goSp(6,-1)">חזור</button><button class="wnext" id="n7" onclick="goSp(8,1)">המשך ←</button></div>
+        </div>
+
+        <div class="sp" id="sp8">
+          <div class="sp-title">מוכנים לקסם? ✨</div>
+          <div id="sumGrid" style="background:var(--cream); padding:20px; border-radius:15px; margin-bottom:20px; line-height:2"></div>
+          
+          <div style="background:var(--tlt); padding:25px; border-radius:15px; border:2px dashed var(--teal); margin-top:20px; text-align:center; box-shadow:var(--sh);">
+            <div style="font-size:22px; font-weight:900; color:var(--teal2); margin-bottom:5px;">לאן לשלוח את המסלול? 💌</div>
+            <p style="font-size:15px; color:var(--ink2); margin-bottom:20px; font-weight:500;">הזינו את האימייל שלכם כדי שנוכל לשמור את הנתונים ולעדכן אתכם בהמשך התהליך.</p>
+            <div class="srch" style="max-width:350px; margin:0 auto;">
+              <input type="email" id="userEmail" placeholder="my-email@example.com" required style="border:3px solid var(--teal); font-size:18px; padding:15px; text-align:center; font-weight:700; border-radius:12px; box-shadow:0 4px 15px rgba(38,121,108,0.15);">
+            </div>
+          </div>
+
+          <div class="wnav" style="margin-top:30px;"><button class="wback" onclick="goSp(7,-1)">עריכה</button><button class="wgo" id="goBtn" onclick="handleGo()">✈️ שלחו בקשה!</button></div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+    <div class="wphoto-col" id="wPhotoCol">
+      <div class="wpm">
+        <img id="pMain" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900">
+        <div class="wpm-cap" id="pMainName">מוכנים להרפתקה</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gen" id="genOv">
+  <div class="spinner"></div>
+  <div class="pct" id="loadPct">שולח נתונים...</div>
+  <div id="gs" class="gen-step">מעביר את הבקשה למומחים שלנו</div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const S = {
+  readiness:'סגור על יעד', destLabel:'', dest:'', type:'', days:3, adults:2,
+  totalBudget:0, currency:'₪', includesFlights:false, budgetPerPerson:false,
+  budgetAttr:'', budgetFood:'', accommodationLevel:'', nightlyBudget:0, vibe:[], extreme:'', pace:'', 
+  transport:'', transfers:'', transferPace:'', longDrives:'', strategy:'', anchors:'', season:'', notes:'',
+  dateFrom:'', dateTo:'', tripPurpose:'', liked:'', disliked:'',
+  stroller:false, dog:false, 
+  shabbat:false, kosherFood:false, kosherSupermarkets:false, noMeat:false, vegan:false, glutenfree:false,
+  startTime:'08:00', endTime:'22:00', drivers:1,
+  children:[],
+  userEmail: '',
+  hasFlights: false, hasHotels: false, planningStatus: 'עדיין לא התחלנו', isQualifiedForMVP: false
+};
+let wCur = 1;
+const TOTAL_STEPS = 8;
+
+function buildDots(){
+  const c = document.getElementById('wDots');
+  if(!c) return;
+  c.innerHTML='';
+  const labels = ['יעד','נוסעים','מטרה','תקציב','סגנון','לוגיסטיקה','הגבלות','סיכום'];
+  for(let i=1;i<=TOTAL_STEPS;i++){
+    c.innerHTML+=`<div class="sdot ${i===wCur?'on':i<wCur?'done':''}"></div>`;
+  }
+  const stepLabel = document.getElementById('wStepLabel');
+  if(stepLabel) stepLabel.textContent = `שלב ${wCur} מתוך ${TOTAL_STEPS}: ${labels[wCur-1]||''}`;
+}
+
+function goSp(n, dir){
+  document.querySelectorAll('.sp').forEach(s=>s.classList.remove('on'));
+  const targetSp = document.getElementById('sp'+n);
+  if(targetSp) targetSp.classList.add('on');
+  wCur=n;
+  buildDots();
+  if(n===8) buildSum();
+}
+
+function chkBtns(){
+  try {
+    const n1 = document.getElementById('n1'); if(n1) n1.disabled = !S.destLabel;
+    const n2 = document.getElementById('n2'); if(n2) n2.disabled = !S.type;
+    const n4 = document.getElementById('n4'); if(n4) n4.disabled = (S.totalBudget <= 0);
+    const n5 = document.getElementById('n5'); if(n5) n5.disabled = (S.vibe.length===0 || !S.extreme);
+    const n6 = document.getElementById('n6');
+    if(n6) n6.disabled = !(S.transport && S.pace && S.transfers && S.transferPace && S.longDrives);
+  } catch (e) { console.error(e); }
+}
+
+let dbt;
+async function searchLoc(q){
+  const box=document.getElementById('dropdownDest');
+  if(!box) return;
+  if(!q.trim()){box.style.display='none';return;}
+  clearTimeout(dbt);
+  dbt=setTimeout(async()=>{
+    try {
+      const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=geojson&limit=5&accept-language=he`);
+      const data=await res.json();
+      box.innerHTML='';
+      data.features.forEach(f=>{
+        const div=document.createElement('div');
+        div.innerHTML=`📍 <b>${f.properties.name}</b><br><small>${f.properties.display_name}</small>`;
+        div.onclick=()=>{
+          document.getElementById('destIn').value=f.properties.name;
+          S.destLabel=f.properties.name; S.dest=f.properties.display_name;
+          document.getElementById('pMainName').innerText=f.properties.name;
+          box.style.display='none'; chkBtns();
+        };
+        box.appendChild(div);
+      });
+      box.style.display='block';
+    } catch(e) { console.error(e); }
+  },800);
+}
+
+document.getElementById('destIn')?.addEventListener('input',e=>{S.destLabel='';chkBtns();searchLoc(e.target.value);});
+document.getElementById('dateFrom')?.addEventListener('change',e=>{S.dateFrom=e.target.value; calcDays();});
+document.getElementById('dateTo')?.addEventListener('change',e=>{S.dateTo=e.target.value; calcDays();});
+
+function calcDays(){
+  if(S.dateFrom&&S.dateTo){
+    const diff=Math.round((new Date(S.dateTo)-new Date(S.dateFrom))/(1000*60*60*24));
+    if(diff>0){
+        let limitedDiff = Math.min(diff, 14);
+        S.days = limitedDiff;
+        document.getElementById('dv').innerText = limitedDiff;
+        document.querySelector('#sp1 input[type=range]').value = limitedDiff;
+    }
+  }
+}
+
+function pGroup(el,k,v,g){
+  document.querySelectorAll(`[onclick*="${g}"]`).forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); S[k]=v; chkBtns();
+  if(k==='type') {
+    document.getElementById('adultsSection').style.display='block';
+    document.getElementById('childrenSection').style.display=(v==='משפחה')?'block':'none';
+  }
+}
+
+function toggleVibe(el,v){
+  if(S.vibe.includes(v)){S.vibe=S.vibe.filter(x=>x!==v);el.classList.remove('on');}
+  else{S.vibe.push(v);el.classList.add('on');}
+  chkBtns();
+}
+
+function setExtreme(el,v){
+  document.querySelectorAll('#extQuest .oc').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); S.extreme=v; chkBtns();
+}
+
+function onDays(el){ S.days=+el.value; document.getElementById('dv').innerText=el.value; chkBtns(); }
+
+function toggleBool(field){
+  S[field]=!S[field];
+  const t = document.getElementById(field+'Toggle');
+  t.textContent=S[field]?'כן':'לא'; t.style.background=S[field]?'var(--tlt)':'var(--cream3)';
+}
+
+function toggleCustomBool(field){
+  S[field]=!S[field];
+  const t = document.getElementById(field+'Toggle');
+  if(field === 'includesFlights' || field === 'hasFlights' || field === 'hasHotels') t.textContent = S[field] ? 'כן' : 'לא';
+  else if (field === 'budgetPerPerson') t.textContent = S[field] ? 'לאדם' : 'לכל ההרכב';
+  t.style.background=S[field]?'var(--tlt)':'var(--cream3)';
+}
+
+function onBudgetInput(){ S.totalBudget = parseInt(document.getElementById('totalBudgetIn').value) || 0; chkBtns(); }
+function toggleBoolOc(el,field){ S[field]=!S[field]; el.classList.toggle('on',S[field]); }
+
+let childCount=0;
+function addChild(){
+  childCount++; const id='child_'+childCount; S.children.push({id,age:0});
+  const div=document.createElement('div'); div.className='child-row'; div.id=id;
+  div.innerHTML=`<span>👶 ילד ${childCount}</span> <label>גיל:</label><input type="number" min="0" max="17" value="0" onchange="updateChild('${id}',this.value)"> <button onclick="removeChild('${id}')" style="background:none;border:none;font-size:18px;cursor:pointer;color:#e53935">✕</button>`;
+  document.getElementById('childrenList').appendChild(div);
+}
+function updateChild(id,age){S.children=S.children.map(c=>c.id===id?{...c,age:+age}:c);}
+function removeChild(id){ S.children=S.children.filter(c=>c.id!==id); document.getElementById(id).remove(); }
+
+function buildSum(){
+  S.anchors=document.getElementById('anchorsIn')?.value || '';
+  S.season=document.getElementById('seasonIn')?.value || '';
+  S.notes=document.getElementById('freeNotes')?.value || '';
+  S.tripPurpose=document.getElementById('tripPurposeIn')?.value || '';
+  S.liked=document.getElementById('likedIn')?.value || '';
+  S.disliked=document.getElementById('dislikedIn')?.value || '';
+  S.startTime=document.getElementById('startTime')?.value || '08:00';
+  S.endTime=document.getElementById('endTime')?.value || '22:00';
+  S.drivers=+(document.getElementById('driversIn')?.value || 1);
+  const restrictions=[S.shabbat&&'שמירת שבת',S.kosherFood&&'אוכל כשר',S.kosherSupermarkets&&'סופרים כשרים',S.noMeat&&'לא אוכלים בשר',S.vegan&&'טבעוני',S.glutenfree&&'ללא גלוטן'].filter(Boolean);
+  const budgetStr = `${S.totalBudget} ${S.currency} (${S.budgetPerPerson ? 'לאדם' : 'לכל ההרכב'}) - ${S.includesFlights ? 'כולל טיסות' : 'ללא טיסות'}`;
+  document.getElementById('sumGrid').innerHTML=`
+    📍 <b>יעד:</b> ${S.destLabel}<br>
+    ⏳ <b>משך:</b> ${S.days} ימים ${S.dateFrom?`(${S.dateFrom} → ${S.dateTo})`:''}  <br>
+    👥 <b>נוסעים:</b> ${S.type}${S.children.length?` + ${S.children.length} ילדים`:''}<br>
+    💰 <b>תקציב משוער:</b> ${budgetStr}<br>
+    🛏️ <b>לינה:</b> ${S.accommodationLevel||'לא נבחר'} (תקציב ללילה: ${S.nightlyBudget ? S.nightlyBudget + ' ₪' : 'לא צוין'})<br>
+    🥾 <b>סגנון:</b> ${S.vibe.join(', ')||'לא נבחר'}<br>
+    🚗 <b>התניידות:</b> ${S.transport||'לא נבחר'}<br>
+    ${restrictions.length?`⚠️ <b>הגבלות:</b> ${restrictions.join(', ')}<br>`:''}
+    ${S.anchors?`📌 <b>יעדי חובה:</b> ${S.anchors}<br>`:''}
+  `;
+}
+
+// ============================================================
+// MAIN FLOW - החיבור ל-MAKE
+// ============================================================
+async function handleGo(){
+  // --- אלגוריתם סינון MVP חכם ---
+  let isWithin30Days = false;
+  if (S.dateFrom) {
+      const today = new Date();
+      const fromDate = new Date(S.dateFrom);
+      const diffTime = fromDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      isWithin30Days = (diffDays >= 0 && diffDays <= 30);
+  }
+
+  // הגדרת משתמש רלוונטי לניסוי הקונסיירז' לפי התנאים שקבענו
+  S.isQualifiedForMVP = (
+      S.hasFlights === true && 
+      S.hasHotels === false && 
+      (S.planningStatus === 'עדיין לא התחלנו' || S.planningStatus === 'יש כיוון כללי') &&
+      S.days <= 14 &&
+      isWithin30Days
+  );
+  // ----------------------------------
+
+  const emailInput = document.getElementById('userEmail');
+  // בדיקת תקינות מייל בסיסית
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailInput.value || !emailRegex.test(emailInput.value)) {
+    alert("בבקשה הזינו כתובת אימייל תקינה כדי שנוכל לחזור אליכם עם המסלול.");
+    emailInput.focus();
+    return;
+  }
+  
+  S.userEmail = emailInput.value;
+  buildSum(); 
+
+  document.getElementById('genOv').classList.add('on');
+  
+  try {
+    const webhookUrl = "https://hook.eu1.make.com/3iypaeejlauv9nwbiet5qyncx7hvbb6g";
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(S)
+    });
+    
+    document.getElementById('genOv').classList.remove('on');
+
+    if(response.ok) {
+        // --- שינוי למסך מלא (הסרת תמונה וסמני שלבים) ---
+        document.getElementById('wStepLabel').style.display = 'none';
+        document.getElementById('wDots').style.display = 'none';
+        document.getElementById('wizBody').classList.add('full-screen-mode');
+        document.getElementById('wcolScroll').style.overflowY = 'hidden'; 
+        
+        if(S.isQualifiedForMVP) {
+            // מסך למי שמתאים לפיילוט - מוגדל ופרוס רוחבית
+            document.getElementById('mainWcard').innerHTML = `
+                <div style="text-align:right; width:100%;">
+                    <h2 style="font-size:36px; font-weight:900; margin-bottom:20px; color:var(--teal); text-align:center;">התקבלתם לפיילוט! 🎉</h2>
+                    <p style="font-size:22px; color:var(--ink2); line-height:1.4; margin-bottom:25px; text-align:center;">
+                        <b>היי! 👋 איזה כיף.</b> עברנו על הנתונים שהזנתם, והטיול שלכם נמצא מתאים להשתתף בפיילוט המיוחד שלנו!
+                    </p>
+                    
+                    <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:25px;">
+                        
+                        <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
+                            <b style="color:var(--teal2); font-size:22px; margin-bottom:12px; display:block;">איך זה עובד עכשיו?</b>
+                            <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>בקרוב:</b> מייל לדירוג טופ-אטרקציות.</div>
+                            <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>לאחר מכן:</b> קבלת מסלולים מומלצים לבחירה.</div>
+                            <div style="font-size:18px; color:var(--ink2);">🧳 <b>לסיום:</b> תכנון יומי מפורט כולל מלונות הכי מתאימים!</div>
+                        </div>
+
+                        <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
+                            <div style="background-color:#a64d79; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">המטרה שלנו</div>
+                            <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
+                                לחסוך לכם שעות חיפוש! אנו מגישים <b>תוצר מוגמר וסופי</b> (ללא סבבי תיקונים), המסנן אלפי אפשרויות ל-2-3 אופציות לינה נבחרות שתואמות לתקציב שלכם.
+                            </p>
+                        </div>
+                        
+                    </div>
+
+                    <div style="background:#fef0f0; padding:20px; border-radius:12px; margin-bottom:25px; border:2px solid #ef9a9a;">
+                        <div style="background-color:#6aa84f; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">השקיפות מולכם</div>
+                        <p style="font-size:19px; color:var(--ink2); line-height:1.4; margin-bottom:15px;">
+                            התכנון כולו מוענק לכם <b>בחינם לגמרי!</b> בתמורה, אנחנו מבקשים רק דבר אחד:
+                        </p>
+                        <div style="background-color:#fff; padding:15px; border-radius:8px; border-right:6px solid #d32f2f; margin-bottom:15px;">
+                            <b style="color:#d32f2f; font-size:24px; display:block; line-height:1.3;">
+                                נודה לכם מאוד אם תבצעו את הזמנות המלונות אך ורק דרך הקישורים שיופיעו במסלול (הקישורים יובילו אתכם ישירות ל-Booking).
+                            </b>
+                        </div>
+                        <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
+                            המחיר עבורכם נשאר זהה לחלוטין! אך פעולה זו מאפשרת לנו לקבל עמלה קטנה להמשך פיתוח המיזם.
+                        </p>
+                    </div>
+
+                    <div style="background:var(--tlt); padding:25px; border-radius:12px; border:2px dashed var(--teal); text-align:center;">
+                        <b style="background-color:#ffff00; font-size:24px; color:var(--ink); padding:4px 12px; display:inline-block; margin-bottom:15px;">מוכנים לצאת לדרך? 🚀</b>
+                        <p style="font-size:20px; color:var(--ink2); line-height:1.4; margin-bottom:20px;">
+                            <b>לחצו על האישור מטה</b> כדי לאשר שקראתם ושאתם זורמים עם הפורמט, ואנחנו מיד ניגשים לעבודה.
+                        </p>
+                        <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                            <button class="wgo" onclick="handleDecision('yes')" style="padding:18px 30px; font-size:22px; box-shadow: 0 6px 20px rgba(38,121,108,0.4); flex:1; max-width:350px;">כן, בואו נצא לדרך!</button>
+                            <button class="wback" onclick="handleDecision('no')" style="padding:18px 30px; font-size:20px; flex:1; max-width:350px; border-color:#d8cfc2; background:#fff;">האמת שפחות מתאים לי</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // מסך למי שלא מתאים לפיילוט כרגע - מרכזי וגדול
+            document.getElementById('mainWcard').innerHTML = `
+                <div style="text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; padding:20px;">
+                    <div style="font-size:60px; margin-bottom:15px;">✈️</div>
+                    <h2 style="font-size:36px; font-weight:900; margin-bottom:25px; color:var(--teal);">תודה על ההרשמה!</h2>
+                    
+                    <p style="font-size:22px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
+                        היי! 👋 איזה כיף שאתם מתחילים לחשוב על טיול! קיבלנו את הנתונים שהזנתם.
+                    </p>
+                    
+                    <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
+                        המערכת של WorldTrip נמצאת כעת בשלבי הרצה (Beta) סגורים. עקב הביקוש, אנו מתעדפים כרגע מסלולים לנוסעים ש<b>כבר רכשו כרטיסי טיסה ויוצאים לדרך בחודש הקרוב</b>. מכיוון שאתם בשלבים מוקדמים, <b>לא נוכל להפיק את המסלול המלא כרגע. ♥️</b>
+                    </p>
+                    
+                    <div style="background:var(--cream); padding:30px; border-radius:12px; margin-bottom:25px; max-width:800px; text-align:right;">
+                        <b style="color:var(--teal2); font-size:24px; margin-bottom:10px; display:block;">אבל אל דאגה!</b>
+                        <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin:0;">
+                            שמרנו את הפרטים וההעדפות שלכם. כשהמערכת תיפתח לקהל הרחב (או כשהתאריכים שלכם יתקרבו), תקבלו עדכון כדי להפיק את המסלול המושלם שלכם בשניות!
+                        </p>
+                    </div>
+
+                    <p style="font-size:18px; color:var(--ink3); line-height:1.5; margin-bottom:25px; max-width:800px;">
+                        <i>(אם במקרה יש לכם כרטיסי טיסה לחודש הקרוב ופשוט התפספס הסימון – שלחו לנו הודעה ונדאג להכניס אתכם לפיילוט!)</i>
+                    </p>
+                    
+                    <p style="font-size:22px; color:var(--ink2); line-height:1.5; font-weight:600;">
+                        המון תודה על האמון והסבלנות,<br>צוות WorldTrip ✈️
+                    </p>
+                </div>
+            `;
+        }
+
+    } else {
+        alert("אופס, משהו השתבש בצד השרת. אנא נסו שוב.");
+    }
+
+  } catch(e) {
+    console.error("Fetch Error:", e);
+    alert("הייתה בעיה בשליחת הטופס (שגיאת רשת). אנא ודאו שאתם מחוברים לאינטרנט ונסו שוב.");
+    document.getElementById('genOv').classList.remove('on');
+  }
+}
+
+// פונקציה לטיפול בלחיצת הכפתור של הנסיינים (כן/לא)
+async function handleDecision(answer) {
+    document.getElementById('genOv').classList.add('on');
+    
+    // נוסיף את התשובה (כן/לא) לתוך אובייקט הנתונים הכללי
+    S.answer = answer;
+
+    try {
+        const decisionWebhookUrl = "https://hook.eu1.make.com/3iypaeejlauv9nwbiet5qyncx7hvbb6g"; 
+        
+        // שולחים את כל הנתונים מחדש ב-POST (כדי שב-Make יהיו לך את כל הנתונים, לא רק המייל!)
+        await fetch(decisionWebhookUrl, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(S)
+        });
+    } catch(e) {
+        console.error("Error sending decision", e);
+    }
+    document.getElementById('genOv').classList.remove('on');
+
+    if(answer === 'yes') {
+        document.getElementById('mainWcard').innerHTML = `
+            <div style="text-align:center; padding:60px 20px;">
+                <div style="font-size:80px; margin-bottom:20px;">🚀</div>
+                <h2 style="font-size:40px; font-weight:900; margin-bottom:20px; color:var(--teal);">יצאנו לדרך!</h2>
+                <p style="font-size:22px; color:var(--ink2); line-height:1.6;">
+                    האישור שלך התקבל.<br>בקרוב מאוד יישלח אליך למייל הקישור לדירוג האטרקציות.
+                </p>
+            </div>
+        `;
+    } else {
+        document.getElementById('mainWcard').innerHTML = `
+            <div style="text-align:center; padding:60px 20px;">
+                <div style="font-size:80px; margin-bottom:20px;">👍</div>
+                <h2 style="font-size:40px; font-weight:900; margin-bottom:20px; color:var(--teal);">הכל בסדר!</h2>
+                <p style="font-size:22px; color:var(--ink2); line-height:1.6;">
+                    שמרנו את הפרטים שלך, ונשמח לעמוד לשירותך בתכנון החופשות הבאות כשזה יתאים יותר.
+                </p>
+            </div>
+        `;
+    }
+}
+
+// INIT
+buildDots();
+chkBtns();
+</script>
+</body>
+</html>
