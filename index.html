@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>WorldTrip AI - התחלת תכנון</title>
+<script src="https://www.google.com/recaptcha/api.js?render=6LcP55csAAAAAC_UCYkIgcE9iRCzCQmxe_8Hq-Tk"></script>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -410,6 +411,10 @@ input[type=date]:focus { border-color:var(--teal) }
             <div class="srch" style="max-width:350px; margin:0 auto;">
               <input type="email" id="userEmail" placeholder="my-email@example.com" required style="border:3px solid var(--teal); font-size:18px; padding:15px; text-align:center; font-weight:700; border-radius:12px; box-shadow:0 4px 15px rgba(38,121,108,0.15);">
             </div>
+            <div style="margin-top:15px; font-size:13px; color:var(--ink3); display:flex; align-items:center; justify-content:center; gap:8px;">
+                <input type="checkbox" id="marketingApproval" style="width:18px; height:18px; cursor:pointer;" checked>
+                <label for="marketingApproval" style="cursor:pointer;">קראתי והסכמתי למדיניות הפרטיות, ואני מאשר/ת קבלת דיוור ועדכונים במייל.</label>
+            </div>
           </div>
 
           <div class="wnav" style="margin-top:30px;"><button class="wback" onclick="goSp(7,-1)">עריכה</button><button class="wgo" id="goBtn" onclick="handleGo()">✈️ שלחו בקשה!</button></div>
@@ -448,7 +453,8 @@ const S = {
   startTime:'08:00', endTime:'22:00', drivers:1,
   children:[],
   userEmail: '',
-  hasFlights: false, hasHotels: false, planningStatus: 'עדיין לא התחלנו', isQualifiedForMVP: false
+  hasFlights: false, hasHotels: false, planningStatus: 'עדיין לא התחלנו', isQualifiedForMVP: false,
+  marketingApproval: true
 };
 let wCur = 1;
 const TOTAL_STEPS = 8;
@@ -606,7 +612,21 @@ function buildSum(){
 // MAIN FLOW - החיבור ל-MAKE
 // ============================================================
 async function handleGo(){
-  // --- אלגוריתם סינון MVP חכם ---
+  const emailInput = document.getElementById('userEmail');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailInput.value || !emailRegex.test(emailInput.value)) {
+    alert("בבקשה הזינו כתובת אימייל תקינה כדי שנוכל לחזור אליכם עם המסלול.");
+    emailInput.focus();
+    return;
+  }
+  
+  // הוספת הסטטוס של ה-Checkbox למשתנים
+  const marketingCheckbox = document.getElementById('marketingApproval');
+  if(marketingCheckbox) S.marketingApproval = marketingCheckbox.checked;
+  
+  S.userEmail = emailInput.value;
+  
+  // אלגוריתם סינון MVP חכם
   let isWithin30Days = false;
   if (S.dateFrom) {
       const today = new Date();
@@ -615,8 +635,6 @@ async function handleGo(){
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       isWithin30Days = (diffDays >= 0 && diffDays <= 30);
   }
-
-  // הגדרת משתמש רלוונטי לניסוי הקונסיירז' לפי התנאים שקבענו
   S.isQualifiedForMVP = (
       S.hasFlights === true && 
       S.hasHotels === false && 
@@ -624,148 +642,130 @@ async function handleGo(){
       S.days <= 14 &&
       isWithin30Days
   );
-  // ----------------------------------
 
-  const emailInput = document.getElementById('userEmail');
-  // בדיקת תקינות מייל בסיסית
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if(!emailInput.value || !emailRegex.test(emailInput.value)) {
-    alert("בבקשה הזינו כתובת אימייל תקינה כדי שנוכל לחזור אליכם עם המסלול.");
-    emailInput.focus();
-    return;
-  }
-  
-  S.userEmail = emailInput.value;
   buildSum(); 
-
   document.getElementById('genOv').classList.add('on');
-  
+
+  // --- הפעלת ה-RECAPTCHA והשליחה למייק ---
   try {
-    const webhookUrl = "https://hook.eu1.make.com/3iypaeejlauv9nwbiet5qyncx7hvbb6g";
-    const response = await fetch(webhookUrl, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(S)
-    });
-    
-    document.getElementById('genOv').classList.remove('on');
+      grecaptcha.ready(function() {
+          grecaptcha.execute('6LcP55csAAAAAC_UCYkIgcE9iRCzCQmxe_8Hq-Tk', {action: 'submit'}).then(async function(token) {
+              
+              // הוספת האסימון של גוגל לנתונים
+              S.recaptchaToken = token;
+              
+              // ה-Webhook שלך למייק
+              const webhookUrl = "https://hook.eu1.make.com/3iypaeejlauv9nwbiet5qyncx7hvbb6g";
+              const response = await fetch(webhookUrl, {
+                  method: "POST",
+                  headers: {"Content-Type": "application/json"},
+                  body: JSON.stringify(S)
+              });
+              
+              document.getElementById('genOv').classList.remove('on');
 
-    if(response.ok) {
-        // --- שינוי למסך מלא (הסרת תמונה וסמני שלבים) ---
-        document.getElementById('wStepLabel').style.display = 'none';
-        document.getElementById('wDots').style.display = 'none';
-        document.getElementById('wizBody').classList.add('full-screen-mode');
-        document.getElementById('wcolScroll').style.overflowY = 'hidden'; 
-        
-        if(S.isQualifiedForMVP) {
-            // מסך למי שמתאים לפיילוט - מוגדל ופרוס רוחבית
-            document.getElementById('mainWcard').innerHTML = `
-                <div style="text-align:right; width:100%;">
-                    <h2 style="font-size:36px; font-weight:900; margin-bottom:20px; color:var(--teal); text-align:center;">התקבלתם לפיילוט! 🎉</h2>
-                    <p style="font-size:22px; color:var(--ink2); line-height:1.4; margin-bottom:25px; text-align:center;">
-                        <b>היי! 👋 איזה כיף.</b> עברנו על הנתונים שהזנתם, והטיול שלכם נמצא מתאים להשתתף בפיילוט המיוחד שלנו!
-                    </p>
-                    
-                    <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:25px;">
-                        
-                        <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
-                            <b style="color:var(--teal2); font-size:22px; margin-bottom:12px; display:block;">איך זה עובד עכשיו?</b>
-                            <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>בקרוב:</b> מייל לדירוג טופ-אטרקציות.</div>
-                            <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>לאחר מכן:</b> קבלת מסלולים מומלצים לבחירה.</div>
-                            <div style="font-size:18px; color:var(--ink2);">🧳 <b>לסיום:</b> תכנון יומי מפורט כולל מלונות הכי מתאימים!</div>
-                        </div>
+              if(response.ok) {
+                  document.getElementById('wStepLabel').style.display = 'none';
+                  document.getElementById('wDots').style.display = 'none';
+                  document.getElementById('wizBody').classList.add('full-screen-mode');
+                  document.getElementById('wcolScroll').style.overflowY = 'hidden'; 
+                  
+                  if(S.isQualifiedForMVP) {
+                      document.getElementById('mainWcard').innerHTML = `
+                          <div style="text-align:right; width:100%;">
+                              <h2 style="font-size:36px; font-weight:900; margin-bottom:20px; color:var(--teal); text-align:center;">התקבלתם לפיילוט! 🎉</h2>
+                              <p style="font-size:22px; color:var(--ink2); line-height:1.4; margin-bottom:25px; text-align:center;">
+                                  <b>היי! 👋 איזה כיף.</b> עברנו על הנתונים שהזנתם, והטיול שלכם נמצא מתאים להשתתף בפיילוט המיוחד שלנו!
+                              </p>
+                              
+                              <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:25px;">
+                                  <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
+                                      <b style="color:var(--teal2); font-size:22px; margin-bottom:12px; display:block;">איך זה עובד עכשיו?</b>
+                                      <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>בקרוב:</b> מייל לדירוג טופ-אטרקציות.</div>
+                                      <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>לאחר מכן:</b> קבלת מסלולים מומלצים לבחירה.</div>
+                                      <div style="font-size:18px; color:var(--ink2);">🧳 <b>לסיום:</b> תכנון יומי מפורט כולל מלונות הכי מתאימים!</div>
+                                  </div>
 
-                        <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
-                            <div style="background-color:#a64d79; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">המטרה שלנו</div>
-                            <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
-                                לחסוך לכם שעות חיפוש! אנו מגישים <b>תוצר מוגמר וסופי</b> (ללא סבבי תיקונים), המסנן אלפי אפשרויות ל-2-3 אופציות לינה נבחרות שתואמות לתקציב שלכם.
-                            </p>
-                        </div>
-                        
-                    </div>
+                                  <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
+                                      <div style="background-color:#a64d79; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">המטרה שלנו</div>
+                                      <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
+                                          לחסוך לכם שעות חיפוש! אנו מגישים <b>תוצר מוגמר וסופי</b> (ללא סבבי תיקונים), המסנן אלפי אפשרויות ל-2-3 אופציות לינה נבחרות שתואמות לתקציב שלכם.
+                                      </p>
+                                  </div>
+                              </div>
 
-                    <div style="background:#fef0f0; padding:20px; border-radius:12px; margin-bottom:25px; border:2px solid #ef9a9a;">
-                        <div style="background-color:#6aa84f; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">השקיפות מולכם</div>
-                        <p style="font-size:19px; color:var(--ink2); line-height:1.4; margin-bottom:15px;">
-                            התכנון כולו מוענק לכם <b>בחינם לגמרי!</b> בתמורה, אנחנו מבקשים רק דבר אחד:
-                        </p>
-                        <div style="background-color:#fff; padding:15px; border-radius:8px; border-right:6px solid #d32f2f; margin-bottom:15px;">
-                            <b style="color:#d32f2f; font-size:24px; display:block; line-height:1.3;">
-                                נודה לכם מאוד אם תבצעו את הזמנות המלונות אך ורק דרך הקישורים שיופיעו במסלול (הקישורים יובילו אתכם ישירות ל-Booking).
-                            </b>
-                        </div>
-                        <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
-                            המחיר עבורכם נשאר זהה לחלוטין! אך פעולה זו מאפשרת לנו לקבל עמלה קטנה להמשך פיתוח המיזם.
-                        </p>
-                    </div>
+                              <div style="background:#fef0f0; padding:20px; border-radius:12px; margin-bottom:25px; border:2px solid #ef9a9a;">
+                                  <div style="background-color:#6aa84f; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">השקיפות מולכם</div>
+                                  <p style="font-size:19px; color:var(--ink2); line-height:1.4; margin-bottom:15px;">
+                                      התכנון כולו מוענק לכם <b>בחינם לגמרי!</b> בתמורה, אנחנו מבקשים רק דבר אחד:
+                                  </p>
+                                  <div style="background-color:#fff; padding:15px; border-radius:8px; border-right:6px solid #d32f2f; margin-bottom:15px;">
+                                      <b style="color:#d32f2f; font-size:24px; display:block; line-height:1.3;">
+                                          נודה לכם מאוד אם תבצעו את הזמנות המלונות אך ורק דרך הקישורים שיופיעו במסלול (הקישורים יובילו אתכם ישירות ל-Booking).
+                                      </b>
+                                  </div>
+                                  <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
+                                      המחיר עבורכם נשאר זהה לחלוטין! אך פעולה זו מאפשרת לנו לקבל עמלה קטנה להמשך פיתוח המיזם.
+                                  </p>
+                              </div>
 
-                    <div style="background:var(--tlt); padding:25px; border-radius:12px; border:2px dashed var(--teal); text-align:center;">
-                        <b style="background-color:#ffff00; font-size:24px; color:var(--ink); padding:4px 12px; display:inline-block; margin-bottom:15px;">מוכנים לצאת לדרך? 🚀</b>
-                        <p style="font-size:20px; color:var(--ink2); line-height:1.4; margin-bottom:20px;">
-                            <b>לחצו על האישור מטה</b> כדי לאשר שקראתם ושאתם זורמים עם הפורמט, ואנחנו מיד ניגשים לעבודה.
-                        </p>
-                        <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
-                            <button class="wgo" onclick="handleDecision('yes')" style="padding:18px 30px; font-size:22px; box-shadow: 0 6px 20px rgba(38,121,108,0.4); flex:1; max-width:350px;">כן, בואו נצא לדרך!</button>
-                            <button class="wback" onclick="handleDecision('no')" style="padding:18px 30px; font-size:20px; flex:1; max-width:350px; border-color:#d8cfc2; background:#fff;">האמת שפחות מתאים לי</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            // מסך למי שלא מתאים לפיילוט כרגע - מרכזי וגדול
-            document.getElementById('mainWcard').innerHTML = `
-                <div style="text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; padding:20px;">
-                    <div style="font-size:60px; margin-bottom:15px;">✈️</div>
-                    <h2 style="font-size:36px; font-weight:900; margin-bottom:25px; color:var(--teal);">תודה על ההרשמה!</h2>
-                    
-                    <p style="font-size:22px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
-                        היי! 👋 איזה כיף שאתם מתחילים לחשוב על טיול! קיבלנו את הנתונים שהזנתם.
-                    </p>
-                    
-                    <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
-                        המערכת של WorldTrip נמצאת כעת בשלבי הרצה (Beta) סגורים. עקב הביקוש, אנו מתעדפים כרגע מסלולים לנוסעים ש<b>כבר רכשו כרטיסי טיסה ויוצאים לדרך בחודש הקרוב</b>. מכיוון שאתם בשלבים מוקדמים, <b>לא נוכל להפיק את המסלול המלא כרגע. ♥️</b>
-                    </p>
-                    
-                    <div style="background:var(--cream); padding:30px; border-radius:12px; margin-bottom:25px; max-width:800px; text-align:right;">
-                        <b style="color:var(--teal2); font-size:24px; margin-bottom:10px; display:block;">אבל אל דאגה!</b>
-                        <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin:0;">
-                            שמרנו את הפרטים וההעדפות שלכם. כשהמערכת תיפתח לקהל הרחב (או כשהתאריכים שלכם יתקרבו), תקבלו עדכון כדי להפיק את המסלול המושלם שלכם בשניות!
-                        </p>
-                    </div>
-
-                    <p style="font-size:18px; color:var(--ink3); line-height:1.5; margin-bottom:25px; max-width:800px;">
-                        <i>(אם במקרה יש לכם כרטיסי טיסה לחודש הקרוב ופשוט התפספס הסימון – שלחו לנו הודעה ונדאג להכניס אתכם לפיילוט!)</i>
-                    </p>
-                    
-                    <p style="font-size:22px; color:var(--ink2); line-height:1.5; font-weight:600;">
-                        המון תודה על האמון והסבלנות,<br>צוות WorldTrip ✈️
-                    </p>
-                </div>
-            `;
-        }
-
-    } else {
-        alert("אופס, משהו השתבש בצד השרת. אנא נסו שוב.");
-    }
-
+                              <div style="background:var(--tlt); padding:25px; border-radius:12px; border:2px dashed var(--teal); text-align:center;">
+                                  <b style="background-color:#ffff00; font-size:24px; color:var(--ink); padding:4px 12px; display:inline-block; margin-bottom:15px;">מוכנים לצאת לדרך? 🚀</b>
+                                  <p style="font-size:20px; color:var(--ink2); line-height:1.4; margin-bottom:20px;">
+                                      <b>לחצו על האישור מטה</b> כדי לאשר שקראתם ושאתם זורמים עם הפורמט, ואנחנו מיד ניגשים לעבודה.
+                                  </p>
+                                  <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                                      <button class="wgo" onclick="handleDecision('yes')" style="padding:18px 30px; font-size:22px; box-shadow: 0 6px 20px rgba(38,121,108,0.4); flex:1; max-width:350px;">כן, בואו נצא לדרך!</button>
+                                      <button class="wback" onclick="handleDecision('no')" style="padding:18px 30px; font-size:20px; flex:1; max-width:350px; border-color:#d8cfc2; background:#fff;">האמת שפחות מתאים לי</button>
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                  } else {
+                      document.getElementById('mainWcard').innerHTML = `
+                          <div style="text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; padding:20px;">
+                              <div style="font-size:60px; margin-bottom:15px;">✈️</div>
+                              <h2 style="font-size:36px; font-weight:900; margin-bottom:25px; color:var(--teal);">תודה על ההרשמה!</h2>
+                              <p style="font-size:22px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
+                                  היי! 👋 איזה כיף שאתם מתחילים לחשוב על טיול! קיבלנו את הנתונים שהזנתם.
+                              </p>
+                              <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
+                                  המערכת של WorldTrip נמצאת כעת בשלבי הרצה (Beta) סגורים. עקב הביקוש, אנו מתעדפים כרגע מסלולים לנוסעים ש<b>כבר רכשו כרטיסי טיסה ויוצאים לדרך בחודש הקרוב</b>. מכיוון שאתם בשלבים מוקדמים, <b>לא נוכל להפיק את המסלול המלא כרגע. ♥️</b>
+                              </p>
+                              <div style="background:var(--cream); padding:30px; border-radius:12px; margin-bottom:25px; max-width:800px; text-align:right;">
+                                  <b style="color:var(--teal2); font-size:24px; margin-bottom:10px; display:block;">אבל אל דאגה!</b>
+                                  <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin:0;">
+                                      שמרנו את הפרטים וההעדפות שלכם. כשהמערכת תיפתח לקהל הרחב (או כשהתאריכים שלכם יתקרבו), תקבלו עדכון כדי להפיק את המסלול המושלם שלכם בשניות!
+                                  </p>
+                              </div>
+                              <p style="font-size:18px; color:var(--ink3); line-height:1.5; margin-bottom:25px; max-width:800px;">
+                                  <i>(אם במקרה יש לכם כרטיסי טיסה לחודש הקרוב ופשוט התפספס הסימון – שלחו לנו הודעה ונדאג להכניס אתכם לפיילוט!)</i>
+                              </p>
+                              <p style="font-size:22px; color:var(--ink2); line-height:1.5; font-weight:600;">
+                                  המון תודה על האמון והסבלנות,<br>צוות WorldTrip ✈️
+                              </p>
+                          </div>
+                      `;
+                  }
+              } else {
+                  alert("אופס, משהו השתבש בצד השרת. אנא נסו שוב.");
+              }
+          });
+      });
   } catch(e) {
-    console.error("Fetch Error:", e);
-    alert("הייתה בעיה בשליחת הטופס (שגיאת רשת). אנא ודאו שאתם מחוברים לאינטרנט ונסו שוב.");
-    document.getElementById('genOv').classList.remove('on');
+      console.error("Fetch Error:", e);
+      alert("הייתה בעיה בשליחת הטופס (שגיאת רשת). אנא ודאו שאתם מחוברים לאינטרנט ונסו שוב.");
+      document.getElementById('genOv').classList.remove('on');
   }
 }
 
 // פונקציה לטיפול בלחיצת הכפתור של הנסיינים (כן/לא)
 async function handleDecision(answer) {
     document.getElementById('genOv').classList.add('on');
-    
-    // נוסיף את התשובה (כן/לא) לתוך אובייקט הנתונים הכללי
     S.answer = answer;
 
     try {
         const decisionWebhookUrl = "https://hook.eu1.make.com/3iypaeejlauv9nwbiet5qyncx7hvbb6g"; 
-        
-        // שולחים את כל הנתונים מחדש ב-POST (כדי שב-Make יהיו לך את כל הנתונים, לא רק המייל!)
         await fetch(decisionWebhookUrl, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
