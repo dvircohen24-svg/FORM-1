@@ -87,8 +87,8 @@ html,body{height:100%;font-family:"Heebo",sans-serif;font-size:16px;background:v
 
 input[type=number] { width:100%; padding:14px; border:2px solid var(--cream3); border-radius:10px; font-family:"Heebo"; font-size:16px; font-weight:700; outline:none }
 input[type=number]:focus { border-color:var(--teal) }
-input[type=date] { padding:10px 12px; border:2px solid var(--cream3); border-radius:12px; font-family:"Heebo"; font-size:15px; outline:none; background:var(--cream) }
-input[type=date]:focus { border-color:var(--teal) }
+input[type=date], input[type=time] { padding:10px 12px; border:2px solid var(--cream3); border-radius:12px; font-family:"Heebo"; font-size:15px; outline:none; background:var(--cream) }
+input[type=date]:focus, input[type=time]:focus { border-color:var(--teal) }
 
 .child-row { display:flex; align-items:center; gap:10px; background:var(--cream); padding:10px 14px; border-radius:12px; margin-bottom:8px }
 .child-row input[type=number] { width:60px; padding:8px; text-align:center; }
@@ -106,6 +106,32 @@ input[type=date]:focus { border-color:var(--teal) }
 .full-screen-mode .wcard { padding: 40px 60px; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; overflow-y: hidden;}
 .full-screen-mode .wphoto-col { display: none !important; }
 
+/* ----------------------------------------------------
+   עיצוב מתקדם למסך אישור הפיילוט (מותאם לניידים ללא גלילה)
+   ---------------------------------------------------- */
+.pilot-wrapper { display: flex; flex-direction: column; justify-content: space-evenly; height: 100%; box-sizing: border-box; }
+.pilot-header h2 { font-size: 36px; font-weight: 900; color: var(--teal); margin-bottom: 10px; text-align: center; }
+.pilot-header p { font-size: 22px; color: var(--ink2); line-height: 1.4; text-align: center; margin-bottom: 0; }
+.pilot-row { display: flex; gap: 20px; }
+.pilot-box { flex: 1; background: var(--cream); padding: 20px; border-radius: 12px; box-sizing: border-box; }
+.pilot-box-title { color: var(--teal2); font-size: 22px; font-weight: bold; margin-bottom: 12px; display: block; }
+.pilot-box-item { font-size: 18px; color: var(--ink2); margin-bottom: 8px; }
+.pilot-badge { background-color: #a64d79; color: #ffffff; font-size: 20px; font-weight: bold; padding: 6px 12px; border-radius: 8px; display: inline-block; margin-bottom: 12px; }
+.pilot-badge-green { background-color: #6aa84f; color: #ffffff; font-size: 20px; font-weight: bold; padding: 6px 12px; border-radius: 8px; display: inline-block; margin-bottom: 12px; }
+.pilot-alert { background: #fef0f0; padding: 20px; border-radius: 12px; border: 2px solid #ef9a9a; box-sizing: border-box; }
+.pilot-alert p { font-size: 19px; color: var(--ink2); line-height: 1.4; margin-bottom: 10px; }
+.pilot-alert-inner { background-color: #fff; padding: 15px; border-radius: 8px; border-right: 6px solid #d32f2f; margin-bottom: 15px; }
+.pilot-alert-inner b { color: #d32f2f; font-size: 22px; display: block; line-height: 1.3; }
+.pilot-action { background: var(--tlt); padding: 25px; border-radius: 12px; border: 2px dashed var(--teal); text-align: center; box-sizing: border-box; }
+.pilot-action-title { background-color: #ffff00; font-size: 24px; color: var(--ink); font-weight: bold; padding: 4px 12px; display: inline-block; margin-bottom: 15px; }
+.pilot-action p { font-size: 20px; color: var(--ink2); line-height: 1.4; margin-bottom: 20px; }
+.pilot-btns { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+.pilot-btns button { padding: 18px 20px; font-size: 20px; font-weight: bold; border-radius: 99px; cursor: pointer; flex: 1; min-width: 250px; font-family: "Heebo"; border: none; box-sizing: border-box; transition: 0.2s; }
+.btn-yes { background: var(--teal); color: #fff; box-shadow: 0 6px 20px rgba(38,121,108,0.4); }
+.btn-yes:hover { background: var(--teal2); }
+.btn-no { background: #fff; color: var(--ink2); border: 2px solid #d8cfc2; }
+.btn-no:hover { border-color: var(--ink3); }
+
 @media (max-width: 800px) {
   .topbar { padding: 0 15px; }
   .logo { font-size: 24px; }
@@ -116,7 +142,28 @@ input[type=date]:focus { border-color:var(--teal) }
   .ogrid, .bgrid { grid-template-columns: 1fr !important; }
   .sp-title { font-size: 26px; }
   
-  .full-screen-mode .wcard { padding: 20px; height: auto; overflow-y: auto;}
+  /* הפיכת מסך הסיום לתצוגה נדחסת על מסך אחד */
+  .full-screen-mode .wiz-body { padding: 0; display: block; height: 100dvh; overflow: hidden; }
+  .full-screen-mode .wcol { max-width: 100%; max-height: 100dvh; margin: 0; display: block; }
+  .full-screen-mode .wcard { padding: 3vh 4vw; height: 100dvh; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; border-radius: 0; border: none; box-sizing: border-box; }
+  
+  .pilot-wrapper { gap: 1vh; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+  .pilot-header h2 { font-size: clamp(20px, 4vh, 28px); margin: 0; }
+  .pilot-header p { font-size: clamp(14px, 2.5vh, 18px); margin: 0; line-height: 1.2; }
+  .pilot-row { flex-direction: row; gap: 2vw; }
+  .pilot-box { padding: 1.5vh 2vw; border-radius: 8px; }
+  .pilot-box-title { font-size: clamp(14px, 2.5vh, 18px); margin-bottom: 0.5vh; }
+  .pilot-box-item { font-size: clamp(11px, 2.2vh, 15px); margin-bottom: 0.5vh; line-height: 1.2; }
+  .pilot-badge, .pilot-badge-green { font-size: clamp(13px, 2.5vh, 16px); padding: 0.5vh 2vw; margin-bottom: 1vh; border-radius: 6px; }
+  .pilot-alert { padding: 1.5vh 3vw; border-radius: 8px; margin-bottom: 0;}
+  .pilot-alert p { font-size: clamp(12px, 2.5vh, 16px); margin-bottom: 1vh; line-height: 1.2; }
+  .pilot-alert-inner { padding: 1vh 2vw; margin-bottom: 1vh; border-right-width: 4px; }
+  .pilot-alert-inner b { font-size: clamp(13px, 2.8vh, 18px); line-height: 1.2; }
+  .pilot-action { padding: 2vh 3vw; border-radius: 8px; margin-bottom: 0;}
+  .pilot-action-title { font-size: clamp(14px, 3vh, 20px); margin-bottom: 1vh; padding: 0.5vh 2vw; }
+  .pilot-action p { font-size: clamp(13px, 2.5vh, 18px); margin-bottom: 1.5vh; line-height: 1.2; }
+  .pilot-btns { gap: 2vw; flex-wrap: nowrap; }
+  .pilot-btns button { padding: 1.5vh 2vw; font-size: clamp(14px, 3vh, 18px); min-width: auto; border-radius: 50px; }
 }
 </style>
 </head>
@@ -159,20 +206,19 @@ input[type=date]:focus { border-color:var(--teal) }
           </div>
           <div style="margin-top:10px"><label style="font-weight:700">משך הטיול: <b id="dv">14</b> ימים</label><input type="range" min="1" max="14" value="14" style="width:100%" oninput="onDays(this)"></div>
 
-         <div class="sp-subtitle" style="margin-top:20px;">סטטוס ההכנות:</div>
+          <div class="sp-subtitle" style="margin-top:20px;">סטטוס ההכנות:</div>
           <div class="bgrid">
             <div class="bcard" style="cursor:default">
                 <span>✈️</span><div class="bcard-body"><b>יש כבר כרטיסי טיסה?</b></div>
                 <div onclick="toggleCustomBool('hasFlights')" id="hasFlightsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
             </div>
            
-            <div class="bcard" style="cursor:default">
+           <div class="bcard" style="cursor:default">
                 <span>🏨</span><div class="bcard-body"><b>הוזמנו כבר מלונות?</b></div>
                 <div onclick="toggleCustomBool('hasHotels')" id="hasHotelsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
             </div>
             <div class="bcard" style="cursor:default">
                 <span>🗺️</span><div class="bcard-body"><b>מצב התכנון:</b></div>
-              
                 <select id="planningStatusIn" style="width:130px; padding:5px; border-radius:8px; font-family:Heebo; border:2px solid var(--cream3); outline:none;" onchange="S.planningStatus = this.value;">
                     <option value="עדיין לא התחלנו">לא התחלנו כלל</option>
                     <option value="יש כיוון כללי">יש כיוון כללי</option>
@@ -407,10 +453,20 @@ input[type=date]:focus { border-color:var(--teal) }
           
           <div style="background:var(--tlt); padding:25px; border-radius:15px; border:2px dashed var(--teal); margin-top:20px; text-align:center; box-shadow:var(--sh);">
             <div style="font-size:22px; font-weight:900; color:var(--teal2); margin-bottom:5px;">לאן לשלוח את המסלול? 💌</div>
-            <p style="font-size:15px; color:var(--ink2); margin-bottom:20px; font-weight:500;">הזינו את האימייל שלכם כדי שנוכל לשמור את הנתונים ולעדכן אתכם בהמשך התהליך.</p>
-            <div class="srch" style="max-width:350px; margin:0 auto;">
-              <input type="email" id="userEmail" placeholder="my-email@example.com" required style="border:3px solid var(--teal); font-size:18px; padding:15px; text-align:center; font-weight:700; border-radius:12px; box-shadow:0 4px 15px rgba(38,121,108,0.15);">
+            <p style="font-size:15px; color:var(--ink2); margin-bottom:20px; font-weight:500;">הזינו את הפרטים שלכם כדי שנוכל לשמור את הנתונים ולעדכן אתכם בהמשך התהליך.</p>
+            
+            <div class="srch" style="max-width:350px; margin:0 auto 10px auto;">
+              <input type="text" id="userName" placeholder="שם מלא" required style="border:3px solid var(--teal); font-size:18px; padding:15px; text-align:center; font-weight:700; border-radius:12px; box-shadow:0 4px 15px rgba(38,121,108,0.15);">
             </div>
+            
+            <div class="srch" style="max-width:350px; margin:0 auto 10px auto;">
+              <input type="tel" id="userPhone" placeholder="מספר נייד" required style="border:3px solid var(--teal); font-size:18px; padding:15px; text-align:center; font-weight:700; border-radius:12px; box-shadow:0 4px 15px rgba(38,121,108,0.15); direction:ltr;">
+            </div>
+
+            <div class="srch" style="max-width:350px; margin:0 auto;">
+              <input type="email" id="userEmail" placeholder="my-email@example.com" required style="border:3px solid var(--teal); font-size:18px; padding:15px; text-align:center; font-weight:700; border-radius:12px; box-shadow:0 4px 15px rgba(38,121,108,0.15); direction:ltr;">
+            </div>
+
             <div style="margin-top:15px; font-size:13px; color:var(--ink3); display:flex; align-items:center; justify-content:center; gap:8px;">
                 <input type="checkbox" id="marketingApproval" style="width:18px; height:18px; cursor:pointer;" checked>
                 <label for="marketingApproval" style="cursor:pointer;">קראתי והסכמתי למדיניות הפרטיות, ואני מאשר/ת קבלת דיוור ועדכונים במייל.</label>
@@ -452,10 +508,11 @@ const S = {
   shabbat:false, kosherFood:false, kosherSupermarkets:false, noMeat:false, vegan:false, glutenfree:false,
   startTime:'08:00', endTime:'22:00', drivers:1,
   children:[],
-  userEmail: '',
+  userName: '', userPhone: '', userEmail: '',
   hasFlights: false, hasHotels: false, planningStatus: 'עדיין לא התחלנו', isQualifiedForMVP: false,
   marketingApproval: true
 };
+
 let wCur = 1;
 const TOTAL_STEPS = 8;
 
@@ -486,8 +543,7 @@ function chkBtns(){
     const n2 = document.getElementById('n2'); if(n2) n2.disabled = !S.type;
     const n4 = document.getElementById('n4'); if(n4) n4.disabled = (S.totalBudget <= 0);
     const n5 = document.getElementById('n5'); if(n5) n5.disabled = (S.vibe.length===0 || !S.extreme);
-    const n6 = document.getElementById('n6');
-    if(n6) n6.disabled = !(S.transport && S.pace && S.transfers && S.transferPace && S.longDrives);
+    const n6 = document.getElementById('n6'); if(n6) n6.disabled = !(S.transport && S.pace && S.transfers && S.transferPace && S.longDrives);
   } catch (e) { console.error(e); }
 }
 
@@ -612,18 +668,25 @@ function buildSum(){
 // MAIN FLOW - החיבור ל-MAKE
 // ============================================================
 async function handleGo(){
+  const nameInput = document.getElementById('userName');
+  const phoneInput = document.getElementById('userPhone');
   const emailInput = document.getElementById('userEmail');
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if(!emailInput.value || !emailRegex.test(emailInput.value)) {
-    alert("בבקשה הזינו כתובת אימייל תקינה כדי שנוכל לחזור אליכם עם המסלול.");
-    emailInput.focus();
+
+  // ולידציה לשם, טלפון ומייל
+  if(!nameInput.value.trim() || !phoneInput.value.trim() || !emailInput.value || !emailRegex.test(emailInput.value)) {
+    alert("בבקשה הזינו שם מלא, מספר טלפון וכתובת אימייל תקינה כדי שנוכל לחזור אליכם.");
+    if (!nameInput.value.trim()) nameInput.focus();
+    else if (!phoneInput.value.trim()) phoneInput.focus();
+    else emailInput.focus();
     return;
   }
   
-  // הוספת הסטטוס של ה-Checkbox למשתנים
+  // הוספת הסטטוס של ה-Checkbox ופרטי המשתמש למשתנים
   const marketingCheckbox = document.getElementById('marketingApproval');
   if(marketingCheckbox) S.marketingApproval = marketingCheckbox.checked;
-  
+  S.userName = nameInput.value.trim();
+  S.userPhone = phoneInput.value.trim();
   S.userEmail = emailInput.value;
   
   // אלגוריתם סינון MVP חכם
@@ -642,7 +705,6 @@ async function handleGo(){
       S.days <= 14 &&
       isWithin30Days
   );
-
   buildSum(); 
   document.getElementById('genOv').classList.add('on');
 
@@ -671,52 +733,45 @@ async function handleGo(){
                   document.getElementById('wcolScroll').style.overflowY = 'hidden'; 
                   
                   if(S.isQualifiedForMVP) {
+                      // HTML חדש מבוסס Classes שמותאם במדויק לניידים
                       document.getElementById('mainWcard').innerHTML = `
-                          <div style="text-align:right; width:100%;">
-                              <h2 style="font-size:36px; font-weight:900; margin-bottom:20px; color:var(--teal); text-align:center;">התקבלתם לפיילוט! 🎉</h2>
-                              <p style="font-size:22px; color:var(--ink2); line-height:1.4; margin-bottom:25px; text-align:center;">
-                                  <b>היי! 👋 איזה כיף.</b> עברנו על הנתונים שהזנתם, והטיול שלכם נמצא מתאים להשתתף בפיילוט המיוחד שלנו!
-                              </p>
+                          <div class="pilot-wrapper">
+                              <div class="pilot-header">
+                                  <h2>התקבלתם לפיילוט! 🎉</h2>
+                                  <p><b>היי! 👋 איזה כיף.</b> עברנו על הנתונים שהזנתם, והטיול שלכם נמצא מתאים להשתתף בפיילוט המיוחד שלנו!</p>
+                              </div>
                               
-                              <div style="display:flex; flex-wrap:wrap; gap:20px; margin-bottom:25px;">
-                                  <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
-                                      <b style="color:var(--teal2); font-size:22px; margin-bottom:12px; display:block;">איך זה עובד עכשיו?</b>
-                                      <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>בקרוב:</b> מייל לדירוג טופ-אטרקציות.</div>
-                                      <div style="margin-bottom:8px; font-size:18px; color:var(--ink2);">🧳 <b>לאחר מכן:</b> קבלת מסלולים מומלצים לבחירה.</div>
-                                      <div style="font-size:18px; color:var(--ink2);">🧳 <b>לסיום:</b> תכנון יומי מפורט כולל מלונות הכי מתאימים!</div>
+                              <div class="pilot-row">
+                                  <div class="pilot-box">
+                                      <span class="pilot-box-title">איך זה עובד עכשיו?</span>
+                                      <div class="pilot-box-item">🧳 <b>בקרוב:</b> מייל לדירוג טופ-אטרקציות.</div>
+                                      <div class="pilot-box-item">🧳 <b>לאחר מכן:</b> קבלת מסלולים מומלצים לבחירה.</div>
+                                      <div class="pilot-box-item">🧳 <b>לסיום:</b> תכנון יומי מפורט כולל מלונות הכי מתאימים!</div>
                                   </div>
 
-                                  <div style="flex:1; min-width:300px; background:var(--cream); padding:20px; border-radius:12px;">
-                                      <div style="background-color:#a64d79; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">המטרה שלנו</div>
-                                      <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
+                                  <div class="pilot-box">
+                                      <div class="pilot-badge">המטרה שלנו</div>
+                                      <p class="pilot-box-item" style="margin:0;">
                                           לחסוך לכם שעות חיפוש! אנו מגישים <b>תוצר מוגמר וסופי</b> (ללא סבבי תיקונים), המסנן אלפי אפשרויות ל-2-3 אופציות לינה נבחרות שתואמות לתקציב שלכם.
                                       </p>
                                   </div>
                               </div>
 
-                              <div style="background:#fef0f0; padding:20px; border-radius:12px; margin-bottom:25px; border:2px solid #ef9a9a;">
-                                  <div style="background-color:#6aa84f; color:#ffffff; font-size:20px; font-weight:bold; padding:6px 12px; border-radius:8px; display:inline-block; margin-bottom:12px;">השקיפות מולכם</div>
-                                  <p style="font-size:19px; color:var(--ink2); line-height:1.4; margin-bottom:15px;">
-                                      התכנון כולו מוענק לכם <b>בחינם לגמרי!</b> בתמורה, אנחנו מבקשים רק דבר אחד:
-                                  </p>
-                                  <div style="background-color:#fff; padding:15px; border-radius:8px; border-right:6px solid #d32f2f; margin-bottom:15px;">
-                                      <b style="color:#d32f2f; font-size:24px; display:block; line-height:1.3;">
-                                          נודה לכם מאוד אם תבצעו את הזמנות המלונות אך ורק דרך הקישורים שיופיעו במסלול (הקישורים יובילו אתכם ישירות ל-Booking).
-                                      </b>
+                              <div class="pilot-alert">
+                                  <div class="pilot-badge-green">השקיפות מולכם</div>
+                                  <p>התכנון כולו מוענק לכם <b>בחינם לגמרי!</b> בתמורה, אנחנו מבקשים רק דבר אחד:</p>
+                                  <div class="pilot-alert-inner">
+                                      <b>נודה לכם מאוד אם תבצעו את הזמנות המלונות אך ורק דרך הקישורים שיופיעו במסלול (הקישורים יובילו אתכם ישירות ל-Booking).</b>
                                   </div>
-                                  <p style="font-size:18px; color:var(--ink2); line-height:1.4; margin:0;">
-                                      המחיר עבורכם נשאר זהה לחלוטין! אך פעולה זו מאפשרת לנו לקבל עמלה קטנה להמשך פיתוח המיזם.
-                                  </p>
+                                  <p style="margin:0;">המחיר עבורכם נשאר זהה לחלוטין! אך פעולה זו מאפשרת לנו לקבל עמלה קטנה להמשך פיתוח המיזם.</p>
                               </div>
 
-                              <div style="background:var(--tlt); padding:25px; border-radius:12px; border:2px dashed var(--teal); text-align:center;">
-                                  <b style="background-color:#ffff00; font-size:24px; color:var(--ink); padding:4px 12px; display:inline-block; margin-bottom:15px;">מוכנים לצאת לדרך? 🚀</b>
-                                  <p style="font-size:20px; color:var(--ink2); line-height:1.4; margin-bottom:20px;">
-                                      <b>לחצו על האישור מטה</b> כדי לאשר שקראתם ושאתם זורמים עם הפורמט, ואנחנו מיד ניגשים לעבודה.
-                                  </p>
-                                  <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
-                                      <button class="wgo" onclick="handleDecision('yes')" style="padding:18px 30px; font-size:22px; box-shadow: 0 6px 20px rgba(38,121,108,0.4); flex:1; max-width:350px;">כן, בואו נצא לדרך!</button>
-                                      <button class="wback" onclick="handleDecision('no')" style="padding:18px 30px; font-size:20px; flex:1; max-width:350px; border-color:#d8cfc2; background:#fff;">האמת שפחות מתאים לי</button>
+                              <div class="pilot-action">
+                                  <div class="pilot-action-title">מוכנים לצאת לדרך? 🚀</div>
+                                  <p><b>לחצו על האישור מטה</b> כדי לאשר שקראתם ושאתם זורמים עם הפורמט, ואנחנו מיד ניגשים לעבודה.</p>
+                                  <div class="pilot-btns">
+                                      <button class="btn-yes" onclick="handleDecision('yes')">כן, בואו נצא לדרך!</button>
+                                      <button class="btn-no" onclick="handleDecision('no')">האמת שפחות מתאים לי</button>
                                   </div>
                               </div>
                           </div>
@@ -775,7 +830,6 @@ async function handleDecision(answer) {
         console.error("Error sending decision", e);
     }
     document.getElementById('genOv').classList.remove('on');
-
     if(answer === 'yes') {
         document.getElementById('mainWcard').innerHTML = `
             <div style="text-align:center; padding:60px 20px;">
