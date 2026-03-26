@@ -21,7 +21,8 @@ html,body{height:100%;font-family:"Heebo",sans-serif;font-size:16px;background:v
 .topbar{height:75px;background:var(--ink);display:flex;align-items:center;padding:0 30px;gap:20px;flex-shrink:0;z-index:50}
 .logo{font-size:28px;font-weight:900;color:#fff;cursor:pointer}.logo b{color:#c4a270}
 
-.page{display:none;height:calc(100vh - 75px);overflow:hidden;flex-direction:column}
+/* שימוש ב-dvh כדי להתאים לסרגל הכתובות בניידים */
+.page{display:none;height:calc(100dvh - 75px);overflow:hidden;flex-direction:column}
 .page.active{display:flex}
 
 #wizPage{position:relative}
@@ -106,9 +107,7 @@ input[type=date]:focus, input[type=time]:focus { border-color:var(--teal) }
 .full-screen-mode .wcard { padding: 40px 60px; display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; overflow-y: hidden;}
 .full-screen-mode .wphoto-col { display: none !important; }
 
-/* ----------------------------------------------------
-   עיצוב מתקדם למסך אישור הפיילוט (מותאם לניידים ללא גלילה)
-   ---------------------------------------------------- */
+/* עיצוב מתקדם למסך אישור הפיילוט */
 .pilot-wrapper { display: flex; flex-direction: column; justify-content: space-evenly; height: 100%; box-sizing: border-box; }
 .pilot-header h2 { font-size: 36px; font-weight: 900; color: var(--teal); margin-bottom: 10px; text-align: center; }
 .pilot-header p { font-size: 22px; color: var(--ink2); line-height: 1.4; text-align: center; margin-bottom: 0; }
@@ -132,38 +131,66 @@ input[type=date]:focus, input[type=time]:focus { border-color:var(--teal) }
 .btn-no { background: #fff; color: var(--ink2); border: 2px solid #d8cfc2; }
 .btn-no:hover { border-color: var(--ink3); }
 
+/* ============================================================
+   התאמות מדויקות למובייל (Mobile First CSS adjustments)
+   ============================================================ */
 @media (max-width: 800px) {
-  .topbar { padding: 0 15px; }
+  .topbar { height: 60px; padding: 0 15px; } /* הקטנת הבר העליון במובייל כדי לחסוך מקום */
   .logo { font-size: 24px; }
-  .wiz-body { flex-direction: column; overflow-y: auto; padding: 20px; display: block; }
+  .page { height: calc(100dvh - 60px); }
+  
+  .wiz-body { flex-direction: column; overflow-y: auto; padding: 15px; display: block; }
   .wcol { width: 100%; max-height: none; display: block; }
   .wphoto-col { display: none; }
-  .wcard { padding: 20px; }
-  .ogrid, .bgrid { grid-template-columns: 1fr !important; }
+  .wcard { padding: 15px; }
   .sp-title { font-size: 26px; }
+
+  /* הפיכת רוב הגרידים לעמודה אחת */
+  .ogrid, .bgrid { grid-template-columns: 1fr !important; }
   
-  /* הפיכת מסך הסיום לתצוגה נדחסת על מסך אחד */
-  .full-screen-mode .wiz-body { padding: 0; display: block; height: 100dvh; overflow: hidden; }
-  .full-screen-mode .wcol { max-width: 100%; max-height: 100dvh; margin: 0; display: block; }
-  .full-screen-mode .wcard { padding: 3vh 4vw; height: 100dvh; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; border-radius: 0; border: none; box-sizing: border-box; }
+  /* תיקון 2: הפרדה ברורה ושמירה על 3 טורים בתמהיל התקציב במובייל */
+  .budget-mix-row { 
+    flex-direction: column; 
+    align-items: stretch; 
+    margin-bottom: 20px; 
+    padding-bottom: 15px; 
+    border-bottom: 2px dashed var(--cream3); 
+    gap: 10px; 
+  }
+  .budget-mix-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .budget-mix-row label { font-size: 16px; margin-bottom: 0; text-align: center; }
+  .budget-mix-row .bgrid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px; }
+  .budget-mix-row .bcard { padding: 10px 4px; gap: 4px; }
+  .budget-mix-row .bcard span { font-size: 20px; }
+  .budget-mix-row .bcard small { font-size: 12px; text-align: center; line-height: 1.1; }
   
-  .pilot-wrapper { gap: 1vh; display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
-  .pilot-header h2 { font-size: clamp(20px, 4vh, 28px); margin: 0; }
-  .pilot-header p { font-size: clamp(14px, 2.5vh, 18px); margin: 0; line-height: 1.2; }
-  .pilot-row { flex-direction: row; gap: 2vw; }
-  .pilot-box { padding: 1.5vh 2vw; border-radius: 8px; }
-  .pilot-box-title { font-size: clamp(14px, 2.5vh, 18px); margin-bottom: 0.5vh; }
-  .pilot-box-item { font-size: clamp(11px, 2.2vh, 15px); margin-bottom: 0.5vh; line-height: 1.2; }
-  .pilot-badge, .pilot-badge-green { font-size: clamp(13px, 2.5vh, 16px); padding: 0.5vh 2vw; margin-bottom: 1vh; border-radius: 6px; }
-  .pilot-alert { padding: 1.5vh 3vw; border-radius: 8px; margin-bottom: 0;}
-  .pilot-alert p { font-size: clamp(12px, 2.5vh, 16px); margin-bottom: 1vh; line-height: 1.2; }
-  .pilot-alert-inner { padding: 1vh 2vw; margin-bottom: 1vh; border-right-width: 4px; }
-  .pilot-alert-inner b { font-size: clamp(13px, 2.8vh, 18px); line-height: 1.2; }
-  .pilot-action { padding: 2vh 3vw; border-radius: 8px; margin-bottom: 0;}
-  .pilot-action-title { font-size: clamp(14px, 3vh, 20px); margin-bottom: 1vh; padding: 0.5vh 2vw; }
-  .pilot-action p { font-size: clamp(13px, 2.5vh, 18px); margin-bottom: 1.5vh; line-height: 1.2; }
-  .pilot-btns { gap: 2vw; flex-wrap: nowrap; }
-  .pilot-btns button { padding: 1.5vh 2vw; font-size: clamp(14px, 3vh, 18px); min-width: auto; border-radius: 50px; }
+  /* תיקון 1: מסך הפיילוט נדחס לחלוטין ללא גלילה (No-Scroll View) */
+  .full-screen-mode .wiz-body { padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+  .full-screen-mode .wcol { max-height: 100%; display: flex; flex-direction: column; }
+  .full-screen-mode .wcard { padding: 12px 10px; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; border-radius: 0; border: none; overflow-y: auto; }
+  
+  .pilot-wrapper { gap: 6px; display: flex; flex-direction: column; justify-content: space-evenly; height: 100%; }
+  .pilot-header h2 { font-size: clamp(20px, 4vh, 24px); margin-bottom: 2px; line-height: 1.1; }
+  .pilot-header p { font-size: clamp(14px, 2.5vh, 16px); margin-bottom: 0; line-height: 1.2; }
+  
+  .pilot-row { flex-direction: row; gap: 8px; }
+  .pilot-box { padding: 8px; border-radius: 8px; }
+  .pilot-box-title { font-size: clamp(13px, 2.5vh, 15px); margin-bottom: 4px; line-height: 1.1; }
+  .pilot-box-item { font-size: clamp(11px, 2vh, 13px); margin-bottom: 2px; line-height: 1.15; }
+  
+  .pilot-badge, .pilot-badge-green { font-size: clamp(12px, 2.2vh, 14px); padding: 4px 8px; margin-bottom: 4px; border-radius: 6px; }
+  
+  .pilot-alert { padding: 8px 10px; border-radius: 8px; margin-bottom: 0; border-width: 1px; }
+  .pilot-alert p { font-size: clamp(12px, 2.2vh, 14px); margin-bottom: 4px; line-height: 1.15; }
+  .pilot-alert-inner { padding: 6px 10px; margin-bottom: 6px; border-right-width: 4px; }
+  .pilot-alert-inner b { font-size: clamp(13px, 2.5vh, 16px); line-height: 1.15; }
+  
+  .pilot-action { padding: 10px; border-radius: 8px; margin-bottom: 0; border-width: 1px; }
+  .pilot-action-title { font-size: clamp(14px, 2.8vh, 18px); margin-bottom: 6px; padding: 2px 10px; }
+  .pilot-action p { font-size: clamp(13px, 2.2vh, 15px); margin-bottom: 8px; line-height: 1.15; }
+  
+  .pilot-btns { flex-wrap: nowrap; gap: 8px; }
+  .pilot-btns button { padding: 10px 5px; font-size: clamp(14px, 2.5vh, 16px); min-width: 0; border-radius: 99px; }
 }
 </style>
 </head>
@@ -730,10 +757,8 @@ async function handleGo(){
                   document.getElementById('wStepLabel').style.display = 'none';
                   document.getElementById('wDots').style.display = 'none';
                   document.getElementById('wizBody').classList.add('full-screen-mode');
-                  document.getElementById('wcolScroll').style.overflowY = 'hidden'; 
                   
                   if(S.isQualifiedForMVP) {
-                      // HTML חדש מבוסס Classes שמותאם במדויק לניידים
                       document.getElementById('mainWcard').innerHTML = `
                           <div class="pilot-wrapper">
                               <div class="pilot-header">
