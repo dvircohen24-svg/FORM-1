@@ -239,7 +239,7 @@ input[type=date]:focus, input[type=time]:focus { border-color:var(--teal) }
                 <span>✈️</span><div class="bcard-body"><b>יש כבר כרטיסי טיסה?</b></div>
                 <div onclick="toggleCustomBool('hasFlights')" id="hasFlightsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
             </div>
-           
+            
            <div class="bcard" style="cursor:default">
                 <span>🏨</span><div class="bcard-body"><b>הוזמנו כבר מלונות?</b></div>
                 <div onclick="toggleCustomBool('hasHotels')" id="hasHotelsToggle" style="padding:6px 14px;background:var(--cream3);border-radius:99px;font-weight:800;cursor:pointer;font-size:13px">לא</div>
@@ -255,7 +255,7 @@ input[type=date]:focus, input[type=time]:focus { border-color:var(--teal) }
             </div>
           </div>
   
-         <div class="wnav"><div></div><button class="wnext" id="n1" disabled onclick="goSp(2,1)">המשך ←</button></div>
+          <div class="wnav"><div></div><button class="wnext" id="n1" disabled onclick="goSp(2,1)">המשך ←</button></div>
         </div>
 
         <div class="sp" id="sp2">
@@ -717,20 +717,21 @@ async function handleGo(){
   S.userEmail = emailInput.value;
   
   // אלגוריתם סינון MVP חכם
-  let isWithin30Days = false;
+  let isValidDate = false;
   if (S.dateFrom) {
       const today = new Date();
+      today.setHours(0,0,0,0);
       const fromDate = new Date(S.dateFrom);
-      const diffTime = fromDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      isWithin30Days = (diffDays >= 0 && diffDays <= 30);
+      const targetDate = new Date('2026-09-30');
+      isValidDate = (fromDate >= today && fromDate <= targetDate);
   }
+
   S.isQualifiedForMVP = (
       S.hasFlights === true && 
       S.hasHotels === false && 
       (S.planningStatus === 'עדיין לא התחלנו' || S.planningStatus === 'יש כיוון כללי') &&
       S.days <= 14 &&
-      isWithin30Days
+      isValidDate
   );
   buildSum(); 
   document.getElementById('genOv').classList.add('on');
@@ -810,7 +811,7 @@ async function handleGo(){
                                   היי! 👋 איזה כיף שאתם מתחילים לחשוב על טיול! קיבלנו את הנתונים שהזנתם.
                               </p>
                               <p style="font-size:20px; color:var(--ink2); line-height:1.5; margin-bottom:20px; max-width:800px;">
-                                  המערכת של WorldTrip נמצאת כעת בשלבי הרצה (Beta) סגורים. עקב הביקוש, אנו מתעדפים כרגע מסלולים לנוסעים ש<b>כבר רכשו כרטיסי טיסה ויוצאים לדרך בחודש הקרוב</b>. מכיוון שאתם בשלבים מוקדמים, <b>לא נוכל להפיק את המסלול המלא כרגע. ♥️</b>
+                                  המערכת של WorldTrip נמצאת כעת בשלבי הרצה (Beta) סגורים. עקב הביקוש, אנו מתעדפים כרגע מסלולים לנוסעים ש<b>כבר רכשו כרטיסי טיסה ויוצאים לדרך עד סוף ספטמבר</b>. מכיוון שאתם בשלבים מוקדמים, <b>לא נוכל להפיק את המסלול המלא כרגע. ♥️</b>
                               </p>
                               <div style="background:var(--cream); padding:30px; border-radius:12px; margin-bottom:25px; max-width:800px; text-align:right;">
                                   <b style="color:var(--teal2); font-size:24px; margin-bottom:10px; display:block;">אבל אל דאגה!</b>
@@ -819,7 +820,7 @@ async function handleGo(){
                                   </p>
                               </div>
                               <p style="font-size:18px; color:var(--ink3); line-height:1.5; margin-bottom:25px; max-width:800px;">
-                                  <i>(אם במקרה יש לכם כרטיסי טיסה לחודש הקרוב ופשוט התפספס הסימון – שלחו לנו הודעה ונדאג להכניס אתכם לפיילוט!)</i>
+                                  <i>(אם במקרה יש לכם כרטיסי טיסה לחודשים הקרובים ופשוט התפספס הסימון – שלחו לנו הודעה ונדאג להכניס אתכם לפיילוט!)</i>
                               </p>
                               <p style="font-size:22px; color:var(--ink2); line-height:1.5; font-weight:600;">
                                   המון תודה על האמון והסבלנות,<br>צוות WorldTrip ✈️
